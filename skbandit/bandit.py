@@ -1,7 +1,8 @@
 import math
+from abc import ABC, abstractmethod
 
 
-class Bandit:
+class Bandit(ABC):
     """A stochastic, multi-armed bandit player.
 
     A bandit player can be implemented using three methods:
@@ -14,6 +15,14 @@ class Bandit:
 
     def __init__(self, n_arms):
         self.n_arms = n_arms
+
+    @abstractmethod
+    def pull(self) -> int:
+        pass
+
+    @abstractmethod
+    def reward(self, arm: int, reward: float) -> None:
+        pass
 
 
 class RewardAccumulatorMixin:
