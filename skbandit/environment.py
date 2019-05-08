@@ -89,30 +89,30 @@ class StochasticMultiArmedEnvironment(MultiArmedEnvironment, StochasticEnvironme
     """
 
     def __init__(self, distributions: List[random_variable]):
-        self.distributions = distributions
+        self._distributions = distributions
 
         # Determine the best arm. As this requires computing the best reward and the true means, store them.
-        self.means = [d.mean() for d in self.distributions]
-        self.best_reward = max(self.means)
-        self.best_arm = self.means.index(self.best_reward)
+        self._means = [d.mean() for d in self._distributions]
+        self._best_reward = max(self._means)
+        self._best_arm = self._means.index(self._best_reward)
 
     @property
     def n_arms(self) -> int:
-        return len(self.distributions)
+        return len(self._distributions)
 
     def true_reward(self, arm: int) -> float:
-        return self.means[arm]
+        return self._means[arm]
 
     @property
     def true_rewards(self) -> List[float]:
-        return self.means
+        return self._means
 
     def regret(self, reward: float) -> float:
-        return self.best_reward - reward
+        return self._best_reward - reward
 
     def reward(self, arm: int) -> float:
         # Just draw one random number from the corresponding arm.
-        return self.distributions[arm].rvs()
+        return self._distributions[arm].rvs()
 
 
 class Adversary(ABC):
@@ -149,23 +149,28 @@ class AdversarialMultiArmedEnvironment(MultiArmedEnvironment):
         assert n_arms == adversary.n_arms
 
         self._n_arms = n_arms
-        self.adversary = adversary
-        self.last_rewards = None
+        self._adversary = adversary
+        self._last_rewards = None
 
     @property
     def n_arms(self) -> int:
         return self._n_arms
 
     def reward(self, arm: int) -> float:
-        self.last_rewards = self.adversary.pull()
-        reward = self.last_rewards[arm]
-        self.adversary.reward(arm, reward)
+        self._last_rewards = self._adversary.pull()
+        reward = self._last_rewards[arm]
+        self._adversary.reward(arm, reward)
         return reward
 
     def regret(self, reward: float) -> float:
-        if self.last_rewards is None:
+        if self._last_rewards is None:
             raise AssertionError("reward() not called before regret(). The following order must be respected: "
                                  "first, the bandit chooses an arm; then, the adversary decides the rewards"
                                  "(without knowing the arm the bandit plays); finally, the environment returns the "
                                  "reward. All of this is done when calling reward(arm). ")
-        return max(self.last_rewards) - reward
+        return max(self._last_rewards) - reward
+
+
+class FullInformationAdversarialMultiArmedEnvironment(AdversarialMultiArmedEnvironment):
+    def rewards(self) -> List[float]:
+        return self._last_rewards

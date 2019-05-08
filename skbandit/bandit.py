@@ -16,7 +16,7 @@ class Bandit(ABC):
     """
 
     def __init__(self, n_arms: int):
-        self.n_arms = n_arms
+        self._n_arms = n_arms
 
     @abstractmethod
     def pull(self) -> int:
@@ -25,6 +25,10 @@ class Bandit(ABC):
     @abstractmethod
     def reward(self, arm: int, reward: float) -> None:
         pass
+
+    @property
+    def n_arms(self):
+        return self._n_arms
 
 
 class RewardAccumulatorMixin:
@@ -64,42 +68,47 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
         Bandit.__init__(self, n_arms)
         RewardAccumulatorMixin.__init__(self, n_arms)
 
-        self.current_round = 0
-        self.best_arm = None
+        self._current_round = 0
+        self._best_arm = None
 
         if gap is not None and horizon is not None:
-            self.n_epochs = max(1, math.ceil((4 / gap ** 2) * math.log(horizon * gap ** 2 / 4)))
-            self.n_remaining_epochs = self.n_epochs
+            self._n_epochs = max(1, math.ceil((4 / gap ** 2) * math.log(horizon * gap ** 2 / 4)))
+            self._n_remaining_epochs = self._n_epochs
         elif n_epochs is not None:
-            self.n_epochs = n_epochs
-            self.n_remaining_epochs = n_epochs
+            self._n_epochs = n_epochs
+            self._n_remaining_epochs = n_epochs
         else:
-            self.n_epochs = 1
-            self.n_remaining_epochs = 1
+            self._n_epochs = 1
+            self._n_remaining_epochs = 1
 
     def _next_round(self):
-        self.current_round += 1
-        if self.current_round % self.n_arms == 0:
-            self.n_remaining_epochs -= 1
+        self._current_round += 1
+        if self._current_round % self._n_arms == 0:
+            self._n_remaining_epochs -= 1
 
     def pull(self) -> int:
         # Exploration phase: explore once each arm.
-        if self.current_round < self.n_arms * self.n_epochs:
-            arm = self.current_round % self.n_arms
+        if self._current_round < self._n_arms * self._n_epochs:
+            arm = self._current_round % self._n_arms
         # Exploitation phase: always return the best arm (computed only once).
-        elif self.best_arm is not None:
-            arm = self.best_arm
+        elif self._best_arm is not None:
+            arm = self._best_arm
         else:
-            self.best_arm = self.total_rewards.index(max(self.total_rewards))
-            arm = self.best_arm
+            self._best_arm = self.total_rewards.index(max(self.total_rewards))
+            arm = self._best_arm
 
         self._next_round()
         return arm
 
     def reward(self, arm: int, reward: float) -> None:
         # Stop storing rewards after the exploration phase.
-        if self.current_round <= self.n_arms * self.n_epochs:
+        if self._current_round <= self._n_arms * self._n_epochs:
             RewardAccumulatorMixin.reward(self, arm, reward)
+
+
+class ExponentiallyWeightedForecaster(Bandit):
+    pass
+
 
 # TODO: Thompson sampling
 # TODO: epsilon-greedy

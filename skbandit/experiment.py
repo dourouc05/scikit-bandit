@@ -17,8 +17,8 @@ class Experiment(ABC):
     """
 
     def __init__(self, environment: Environment, bandit: Bandit):
-        self.environment = environment
-        self.bandit = bandit
+        self._environment = environment
+        self._bandit = bandit
         self._best_arm = None
 
     @property
@@ -27,17 +27,17 @@ class Experiment(ABC):
 
     def regret(self, reward: float) -> float:
         """Determines the regret when getting a given reward."""
-        return self.environment.regret(reward)
+        return self._environment.regret(reward)
 
     def round(self) -> float:
         """Performs one round of experiment, yielding the regret for this round."""
 
-        if self.environment.may_stop_accepting_inputs and not self.environment.will_accept_input():
+        if self._environment.may_stop_accepting_inputs and not self._environment.will_accept_input():
             raise EnvironmentNoMoreAcceptingInputsException()
 
-        arm = self.bandit.pull()
-        reward = self.environment.reward(arm)
-        self.bandit.reward(arm, reward)
+        arm = self._bandit.pull()
+        reward = self._environment.reward(arm)
+        self._bandit.reward(arm, reward)
         return self.regret(reward)
 
     def rounds(self, n: int) -> float:
@@ -45,12 +45,12 @@ class Experiment(ABC):
 
         If the environment stops accepting inputs within the `n` rounds, execution automatically stops.
         """
-        if not self.environment.may_stop_accepting_inputs:
+        if not self._environment.may_stop_accepting_inputs:
             return sum(self.round() for _ in range(n))
         else:
             total_reward = 0.0
             for _ in range(n):
-                if not self.environment.will_accept_input():
+                if not self._environment.will_accept_input():
                     break
 
                 total_reward += self.round()
