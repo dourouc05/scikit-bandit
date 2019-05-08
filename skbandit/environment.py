@@ -25,6 +25,13 @@ class Environment(ABC):
     def n_arms(self) -> int:
         pass
 
+    @abstractmethod
+    def true_reward(self, arm: Union[int, List[int]]) -> float:
+        """Returns the (theoretical) mean for the given (combination of) arm(s)."""
+        pass
+
+    # No true_rewards, as not all environments have easily enumerable arms.
+
 
 class MultiArmedEnvironment(Environment):
     """An environment on which a multi-armed bandit acts.
@@ -35,6 +42,11 @@ class MultiArmedEnvironment(Environment):
 
     @abstractmethod
     def reward(self, arm: int) -> float:
+        pass
+
+    @abstractmethod
+    @property
+    def n_arms(self) -> int:
         pass
 
 
@@ -53,15 +65,15 @@ class StochasticMultiArmedEnvironment(Environment):
     def n_arms(self) -> int:
         return len(self.distributions)
 
-    def true_mean(self, arm: int) -> float:
+    def true_reward(self, arm: int) -> float:
         """Returns the (theoretical) mean for the given arm."""
         return self.distributions[arm].mean()
 
     @property
-    def true_means(self) -> List[float]:
+    def true_rewards(self) -> List[float]:
         """Returns the (theoretical) mean for each arm that may be played.
 
-        These are also calls true means.
+        These are also called true means.
         """
         return [d.mean() for d in self.distributions]
 
