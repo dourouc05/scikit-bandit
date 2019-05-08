@@ -1,5 +1,6 @@
-from .bandit import Bandit
 from abc import ABC
+
+from .bandit import Bandit
 from .environment import Environment, StochasticMultiArmedEnvironment
 
 
@@ -12,6 +13,7 @@ class Experiment(ABC):
     the one that generates the highest reward -- or one such combination of arms, depending on the setting).
     This is the main task for subclassing an environment.
     """
+
     def __init__(self, environment: Environment, bandit: Bandit):
         self.environment = environment
         self.bandit = bandit
@@ -38,6 +40,7 @@ class MultiArmedStochasticExperiment(Experiment):
 
     An experiment takes two parameters: a `bandit`, which acts on an `environment`.
     """
+
     def __init__(self, environment: StochasticMultiArmedEnvironment, bandit: Bandit):
         super().__init__(environment, bandit)
         means = environment.true_rewards

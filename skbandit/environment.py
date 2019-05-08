@@ -1,9 +1,9 @@
-from typing import List, TypeVar, Union
 from abc import ABC, abstractmethod
-from scipy.stats import rv_continuous, rv_discrete
+from typing import List, TypeVar, Union
 
+from scipy.stats import rv_continuous, rv_discrete, rv_histogram
 
-random_variable = TypeVar('random_variable', rv_continuous, rv_discrete)
+random_variable = TypeVar('random_variable', rv_continuous, rv_discrete, rv_histogram)
 
 
 class Environment(ABC):
@@ -18,11 +18,6 @@ class Environment(ABC):
 
     @abstractmethod
     def reward(self, arm: Union[int, List[int]]) -> Union[float, List[float]]:
-        pass
-
-    @abstractmethod
-    @property
-    def n_arms(self) -> int:
         pass
 
     @abstractmethod
@@ -44,13 +39,13 @@ class MultiArmedEnvironment(Environment):
     def reward(self, arm: int) -> float:
         pass
 
-    @abstractmethod
     @property
+    @abstractmethod
     def n_arms(self) -> int:
         pass
 
 
-class StochasticMultiArmedEnvironment(Environment):
+class StochasticMultiArmedEnvironment(MultiArmedEnvironment):
     """A stochastic environment on which a multi-armed bandit acts.
 
     The only parameter is a list of probability distributions (SciPy random variables, subclasses of either

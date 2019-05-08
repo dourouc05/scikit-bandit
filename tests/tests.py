@@ -1,5 +1,9 @@
 import unittest
+
+from scipy.stats import rv_histogram
+
 from skbandit.bandit import ExploreThenCommitBandit
+from skbandit.environment import StochasticMultiArmedEnvironment
 
 
 class TestExploreThenCommitBandit(unittest.TestCase):
@@ -97,3 +101,21 @@ class TestExploreThenCommitBandit(unittest.TestCase):
         # RewardAccumulatorMixin did not see any change.
         self.assertEqual(b.total_rewards, [10.0, 0.0, 5.0])
         self.assertEqual(b.arm_counts, [1, 1, 1])
+
+
+class TestStochasticMultiArmedEnvironment(unittest.TestCase):
+    def test_one(self):
+        rv0 = rv_histogram(([1], [0, 0.000000001]))
+        rv1 = rv_histogram(([1], [1, 1.000000001]))
+
+        env = StochasticMultiArmedEnvironment([rv0, rv1])
+
+        self.assertEqual(env.n_arms, 2)
+        self.assertAlmostEqual(env.true_reward(0), 0.0)
+        self.assertAlmostEqual(env.true_reward(1), 1.0)
+        self.assertEqual(env.true_rewards[0], env.true_reward(0))
+        self.assertEqual(env.true_rewards[1], env.true_reward(1))
+
+        # For these specific distributions, the rewards are known in advance.
+        self.assertAlmostEqual(env.reward(0), 0.0)
+        self.assertAlmostEqual(env.reward(1), 1.0)

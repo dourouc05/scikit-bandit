@@ -1,6 +1,7 @@
-from typing import Union
-import math
 from abc import ABC, abstractmethod
+from typing import Union
+
+import math
 
 
 class Bandit(ABC):
