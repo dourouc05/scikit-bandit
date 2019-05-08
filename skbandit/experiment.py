@@ -1,7 +1,8 @@
 from abc import ABC
 
 from .bandit import Bandit
-from .environment import Environment, StochasticMultiArmedEnvironment, EnvironmentNoMoreAcceptingInputsException
+from .environment import Environment, StochasticMultiArmedEnvironment, EnvironmentNoMoreAcceptingInputsException, \
+    AdversarialMultiArmedEnvironment
 
 
 class Experiment(ABC):
@@ -11,7 +12,8 @@ class Experiment(ABC):
 
     The constructor is supposed to set the `best_arm` field to the best possible action on the environment (i.e.
     the one that generates the highest reward -- or one such combination of arms, depending on the setting).
-    This is the main task for subclassing an environment.
+    This is the main task for subclassing an environment. The `best_arm` is however not necessarily set, if it
+    does not make sense for the specific environment.
     """
 
     def __init__(self, environment: Environment, bandit: Bandit):
@@ -68,3 +70,14 @@ class MultiArmedStochasticExperiment(Experiment):
 
         means = environment.true_rewards
         self._best_arm = means.index(max(means))
+
+
+class MultiArmedAdversarialExperiment(Experiment):
+    """Performs an experiment with a multi-armed bandit algorithm facing an adversarial setting.
+
+    An experiment takes two parameters: a `bandit`, which acts on an `environment`.
+    """
+
+    def __init__(self, environment: AdversarialMultiArmedEnvironment, bandit: Bandit):
+        super().__init__(environment, bandit)
+        assert environment.n_arms == bandit.n_arms

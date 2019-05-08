@@ -99,3 +99,40 @@ class StochasticMultiArmedEnvironment(MultiArmedEnvironment):
     def reward(self, arm: int) -> float:
         # Just draw one random number from the corresponding arm.
         return self.distributions[arm].rvs()
+
+
+class Adversary(ABC):
+    """The adversary against which a bandit plays.
+
+    The adversary decides a reward for each arm, without knowing which arm the bandit is playing: the method `pull`
+    returns a vector of rewards. Then, the adversary learns the arm that was played (with the reward that it got
+    from it), in order to prepare for future rounds, through the method `reward`.
+    """
+
+    @abstractmethod
+    def reward(self, arm: int, reward: float) -> float:
+        pass
+
+    @abstractmethod
+    def pull(self) -> List[float]:
+        pass
+
+
+class AdversarialMultiArmedEnvironment(MultiArmedEnvironment):
+    """An adversarial environment on which a multi-armed bandit acts.
+
+    The only parameter is an adversary.
+    """
+
+    def __init__(self, n_arms: int, adversary: Adversary):
+        self._n_arms = n_arms
+        self.adversary = adversary
+
+    @property
+    def n_arms(self) -> int:
+        return self._n_arms
+
+    def reward(self, arm: int) -> float:
+        reward = self.adversary.pull()[arm]
+        self.adversary.reward(arm, reward)
+        return reward
