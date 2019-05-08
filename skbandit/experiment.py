@@ -25,9 +25,9 @@ class Experiment(ABC):
     def best_arm(self):
         return self._best_arm
 
-    def regret(self, reward) -> float:
+    def regret(self, reward: float) -> float:
         """Determines the regret when getting a given reward."""
-        return self.environment.true_reward(self._best_arm) - reward
+        return self.environment.regret(reward)
 
     def round(self) -> float:
         """Performs one round of experiment, yielding the regret for this round."""

@@ -1,10 +1,11 @@
 import unittest
+from typing import List
 
 from scipy.stats import rv_histogram
 
 from skbandit.bandit import ExploreThenCommitBandit
-from skbandit.environment import StochasticMultiArmedEnvironment
-from skbandit.experiment import MultiArmedStochasticExperiment
+from skbandit.environment import StochasticMultiArmedEnvironment, AdversarialMultiArmedEnvironment, Adversary
+from skbandit.experiment import MultiArmedStochasticExperiment, MultiArmedAdversarialExperiment
 
 
 class TestExploreThenCommitBandit(unittest.TestCase):
@@ -122,6 +123,34 @@ class TestStochasticMultiArmedEnvironment(unittest.TestCase):
         self.assertAlmostEqual(env.reward(1), 1.0)
 
 
+class DeterministicAdversary(Adversary):
+    def __init__(self):
+        super().__init__(2)
+
+    def reward(self, arm: int, reward: float) -> None:
+        pass
+
+    def pull(self) -> List[float]:
+        return [0.0, 1.0]
+
+
+class TestAdversarialMultiArmedEnvironment(unittest.TestCase):
+    def test_mismatch_env_bandit(self):
+        with self.assertRaises(AssertionError):
+            AdversarialMultiArmedEnvironment(4, DeterministicAdversary())  # DeterministicAdversary: 2 arms
+
+    def test_one(self):
+        env = AdversarialMultiArmedEnvironment(2, DeterministicAdversary())
+
+        self.assertEqual(env.n_arms, 2)
+
+        # For this specific adversary, the rewards are known in advance.
+        self.assertAlmostEqual(env.reward(0), 0.0)
+        self.assertAlmostEqual(env.reward(1), 1.0)
+        self.assertAlmostEqual(env.regret(0.0), 1.0)
+        self.assertAlmostEqual(env.regret(1.0), 0.0)
+
+
 class TestMultiArmedStochasticExperiment(unittest.TestCase):
     def test_mismatch_env_bandit(self):
         rv0 = rv_histogram(([1], [0, 0.000000001]))
@@ -139,7 +168,6 @@ class TestMultiArmedStochasticExperiment(unittest.TestCase):
         env = StochasticMultiArmedEnvironment([rv0, rv1])
 
         b = ExploreThenCommitBandit(n_arms=2)
-
         exp = MultiArmedStochasticExperiment(env, b)
 
         self.assertEqual(exp.best_arm, 1)
@@ -162,8 +190,44 @@ class TestMultiArmedStochasticExperiment(unittest.TestCase):
         env = StochasticMultiArmedEnvironment([rv0, rv1])
 
         b = ExploreThenCommitBandit(n_arms=2)
-
         exp = MultiArmedStochasticExperiment(env, b)
 
         # Perform a few rounds only with rounds. The bandit will play the first arm, then the second, then the best.
+        self.assertAlmostEqual(exp.rounds(10), 1.0)
+
+
+class TestMultiArmedAdversarialExperiment(unittest.TestCase):
+    def test_mismatch_env_bandit(self):
+        with self.assertRaises(AssertionError):
+            env = AdversarialMultiArmedEnvironment(2, DeterministicAdversary())
+            b = ExploreThenCommitBandit(n_arms=20)
+
+            MultiArmedAdversarialExperiment(env, b)
+
+    def test_one(self):
+        env = AdversarialMultiArmedEnvironment(2, DeterministicAdversary())
+        b = ExploreThenCommitBandit(n_arms=2)
+        exp = MultiArmedAdversarialExperiment(env, b)
+
+        self.assertEqual(exp.best_arm, None)
+        with self.assertRaises(AssertionError):
+            exp.regret(1.0)
+
+        self.assertAlmostEqual(exp.round(), 1.0)  # The bandit plays the first arm.
+        self.assertAlmostEqual(exp.round(), 0.0)  # The bandit plays the second arm.
+        self.assertAlmostEqual(exp.round(), 0.0)  # The bandit plays the best arm.
+
+        self.assertAlmostEqual(exp.regret(0.0), 1.0)
+        self.assertAlmostEqual(exp.regret(1.0), 0.0)
+
+        # Then a few more.
+        self.assertAlmostEqual(exp.rounds(10), 0.0)
+
+    def test_two(self):
+        env = AdversarialMultiArmedEnvironment(2, DeterministicAdversary())
+        b = ExploreThenCommitBandit(n_arms=2)
+        exp = MultiArmedAdversarialExperiment(env, b)
+
+        # Perform a few rounds only with rounds. The bandit will play the first arm, then the second, then the best
+        # (even though it does not consider the environment is adversary).
         self.assertAlmostEqual(exp.rounds(10), 1.0)
