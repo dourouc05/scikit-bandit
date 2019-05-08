@@ -13,7 +13,8 @@ class Environment(ABC):
 
     An environment mainly implements a method `reward`, which returns the reward(s) obtained when the bandit plays
     a (set of) arms. Depending on the exact setting, this environment performs stochastically or adversarially,
-    giving one reward (full-bandit feedback) or one reward per arm (semi-bandit feedback), when these terms make sense.
+    giving one reward (full-bandit feedback) or one reward per arm (semi-bandit feedback/full information),
+    when these terms make sense (linear bandits, adversarial settings, mostly).
 
     A round corresponds to one call of the `reward` method. If calling this method becomes impossible (because
     resources are exhausted, for instance), you must implement both `may_stop_accepting_inputs` and

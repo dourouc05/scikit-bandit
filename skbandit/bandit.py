@@ -54,6 +54,8 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
     Its regret scales as the square root of the number of rounds, if the number of epochs is chosen accordingly to
     the minimum gap and the time horizon (using the `gap` and `horizon` parameter). Otherwise, it grows linearly.
 
+    Also known as a greedy bandit.
+
     See also: https://tor-lattimore.com/downloads/book/book.pdf, Chapter 6.
     """
 
@@ -98,3 +100,20 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
         # Stop storing rewards after the exploration phase.
         if self.current_round <= self.n_arms * self.n_epochs:
             RewardAccumulatorMixin.reward(self, arm, reward)
+
+# TODO: Thompson sampling
+# TODO: epsilon-greedy
+#   Example source: https://towardsdatascience.com/solving-multiarmed-bandits-a-comparison-of-epsilon-greedy-and-thompson-sampling-d97167ca9a50
+# TODO: softmax-greedy
+#   Example source: https://mpatacchiola.github.io/blog/2017/08/14/dissecting-reinforcement-learning-6.html
+# TODO: UCB
+#   Example source: https://tor-lattimore.com/downloads/book/book.pdf, chapter 7
+# TODO: MOSS
+#   Example source: https://tor-lattimore.com/downloads/book/book.pdf, chapter 9
+# TODO: EXP3
+#   Example source: https://tor-lattimore.com/downloads/book/book.pdf, chapter 11
+# TODO: Explore what others implement:
+#   https://github.com/jkomiyama/banditlib
+#   https://www.di.ens.fr/~cappe/Code/PymaBandits/
+#   https://github.com/flaviotruzzi/AdBandits
+#   http://banditslilian.gforge.inria.fr/index.html -> https://smpybandits.readthedocs.io/en/latest/docs/Policies.html#submodules
