@@ -17,11 +17,15 @@ class Experiment(ABC):
     def __init__(self, environment: Environment, bandit: Bandit):
         self.environment = environment
         self.bandit = bandit
-        self.best_arm = None
+        self._best_arm = None
+
+    @property
+    def best_arm(self):
+        return self._best_arm
 
     def regret(self, reward) -> float:
         """Determines the regret when getting a given reward."""
-        return self.environment.true_reward(self.best_arm) - reward
+        return self.environment.true_reward(self._best_arm) - reward
 
     def round(self) -> float:
         """Performs one round of experiment, yielding the regret for this round."""
@@ -43,5 +47,8 @@ class MultiArmedStochasticExperiment(Experiment):
 
     def __init__(self, environment: StochasticMultiArmedEnvironment, bandit: Bandit):
         super().__init__(environment, bandit)
+
+        assert environment.n_arms == bandit.n_arms
+
         means = environment.true_rewards
-        self.best_arm = means.index(max(means))
+        self._best_arm = means.index(max(means))
