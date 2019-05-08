@@ -14,6 +14,10 @@ class Environment(ABC):
     An environment mainly implements a method `reward`, which returns the reward(s) obtained when the bandit plays
     a (set of) arms. Depending on the exact setting, this environment performs stochastically or adversarially,
     giving one reward (full-bandit feedback) or one reward per arm (semi-bandit feedback), when these terms make sense.
+
+    A round corresponds to one call of the `reward` method. If calling this method becomes impossible (because
+    resources are exhausted, for instance), you must implement both `may_stop_accepting_inputs` and
+    `will_accept_input`.
     """
 
     @abstractmethod
@@ -26,6 +30,25 @@ class Environment(ABC):
         pass
 
     # No true_rewards, as not all environments have easily enumerable arms.
+
+    @property
+    def may_stop_accepting_inputs(self) -> bool:
+        """Indicates whether the environment may stop accepting inputs or always accepts bandit actions.
+
+        For instance, the environment has the notion of resource: when it is exhausted, the bandit can no more play.
+        In this case, the property should be overwritten to return `True`.
+        """
+        return False
+
+    # noinspection PyMethodMayBeStatic
+    def will_accept_input(self) -> bool:
+        """Indicates whether the environment will react correctly at the next round."""
+        return True
+
+
+class EnvironmentNoMoreAcceptingInputsException(Exception):
+    """The environment no more accepts interactions."""
+    pass
 
 
 class MultiArmedEnvironment(Environment):

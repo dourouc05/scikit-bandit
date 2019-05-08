@@ -1,7 +1,7 @@
 from abc import ABC
 
 from .bandit import Bandit
-from .environment import Environment, StochasticMultiArmedEnvironment
+from .environment import Environment, StochasticMultiArmedEnvironment, EnvironmentNoMoreAcceptingInputsException
 
 
 class Experiment(ABC):
@@ -29,14 +29,30 @@ class Experiment(ABC):
 
     def round(self) -> float:
         """Performs one round of experiment, yielding the regret for this round."""
+
+        if self.environment.may_stop_accepting_inputs and not self.environment.will_accept_input():
+            raise EnvironmentNoMoreAcceptingInputsException()
+
         arm = self.bandit.pull()
         reward = self.environment.reward(arm)
         self.bandit.reward(arm, reward)
         return self.regret(reward)
 
     def rounds(self, n: int) -> float:
-        """Performs several rounds of experiment, yielding the total regret."""
-        return sum(self.round() for _ in range(n))
+        """Performs several rounds of experiment, yielding the total regret.
+
+        If the environment stops accepting inputs within the `n` rounds, execution automatically stops.
+        """
+        if not self.environment.may_stop_accepting_inputs:
+            return sum(self.round() for _ in range(n))
+        else:
+            total_reward = 0.0
+            for _ in range(n):
+                if not self.environment.will_accept_input():
+                    break
+
+                total_reward += self.round()
+            return total_reward
 
 
 class MultiArmedStochasticExperiment(Experiment):
