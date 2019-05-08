@@ -1,3 +1,4 @@
+from typing import Union
 import math
 from abc import ABC, abstractmethod
 
@@ -26,11 +27,11 @@ class Bandit(ABC):
 
 
 class RewardAccumulatorMixin:
-    def __init__(self, n_arms):
+    def __init__(self, n_arms: int):
         self.arm_counts = [0] * n_arms
         self.total_rewards = [0.0] * n_arms
 
-    def reward(self, arm, reward):
+    def reward(self, arm: int, reward: float) -> None:
         self.arm_counts[arm] += 1
         self.total_rewards[arm] += reward
 
@@ -47,13 +48,14 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
     See also: https://tor-lattimore.com/downloads/book/book.pdf, Chapter 6.
     """
 
-    def __init__(self, n_arms, n_epochs=None, gap=None, horizon=None):
+    def __init__(self, n_arms: int, n_epochs: Union[int, None] = None, gap: Union[float, None] = None,
+                 horizon: Union[int, None] = None):
         super().__init__(n_arms)
         self.current_round = 0
         self.best_arm = None
 
         if gap is not None and gap is not None:
-            self.n_epochs = max(1, math.ceil((4 / gap**2) * math.log(horizon * gap**2 / 4)))
+            self.n_epochs = max(1, math.ceil((4 / gap ** 2) * math.log(horizon * gap ** 2 / 4)))
             self.n_remaining_epochs = self.n_epochs
         elif n_epochs is not None:
             self.n_epochs = n_epochs
@@ -62,7 +64,7 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
             self.n_epochs = 1
             self.n_remaining_epochs = 1
 
-    def pull(self):
+    def pull(self) -> int:
         # Exploration phase: explore once each arm.
         if self.current_round < self.n_arms * self.n_epochs:
             return self.current_round % self.n_arms
@@ -73,7 +75,7 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
             self.best_arm = self.total_rewards.index(max(self.total_rewards))
             return self.best_arm
 
-    def reward(self, arm, reward):
+    def reward(self, arm: int, reward: float) -> None:
         # Stop storing rewards after the exploration phase.
         if self.current_round < self.n_arms:
             super().reward(arm, reward)
