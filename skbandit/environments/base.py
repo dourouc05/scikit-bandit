@@ -28,11 +28,11 @@ class Environment(ABC):
 
     def reward(self, arm: Union[int, List[int]]) -> float:
         """Record the interaction and return a scalar reward."""
-        raise NotImplemented()
+        raise NotImplementedError
 
     def rewards(self, arm: Union[int, List[int]]) -> (Union[List[float], Dict[int, float]], float):
         """Record the interaction and return a vector reward."""
-        raise NotImplemented()
+        raise NotImplementedError
 
     @abstractmethod
     def regret(self, reward: float) -> float:

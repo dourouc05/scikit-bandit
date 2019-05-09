@@ -62,7 +62,7 @@ class FullInformationExperiment(Experiment):
 
     def round(self) -> float:
         if self._environment.may_stop_accepting_inputs and not self._environment.will_accept_input():
-            raise EnvironmentNoMoreAcceptingInputsException()
+            raise EnvironmentNoMoreAcceptingInputsException
 
         arm = self._bandit.pull()
         rewards, reward = self._environment.rewards(arm)  # List and float.
@@ -78,7 +78,7 @@ class SemiBanditFeedbackExperiment(Experiment):
 
     def round(self) -> float:
         if self._environment.may_stop_accepting_inputs and not self._environment.will_accept_input():
-            raise EnvironmentNoMoreAcceptingInputsException()
+            raise EnvironmentNoMoreAcceptingInputsException
 
         arm = self._bandit.pull()
         rewards, reward = self._environment.rewards(arm)  # Dictionary and float.
@@ -94,7 +94,7 @@ class BanditFeedbackExperiment(Experiment):
 
     def round(self) -> float:
         if self._environment.may_stop_accepting_inputs and not self._environment.will_accept_input():
-            raise EnvironmentNoMoreAcceptingInputsException()
+            raise EnvironmentNoMoreAcceptingInputsException
 
         arm = self._bandit.pull()
         reward = self._environment.reward(arm)

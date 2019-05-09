@@ -23,10 +23,10 @@ class Bandit(ABC):
         pass
 
     def reward(self, arm: int, reward: float) -> None:
-        raise NotImplemented()
+        raise NotImplementedError
 
     def rewards(self, reward: Union[List[float], Dict[int, float]]) -> None:
-        raise NotImplemented()
+        raise NotImplementedError
 
     @property
     def n_arms(self):

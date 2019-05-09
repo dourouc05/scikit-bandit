@@ -30,7 +30,7 @@ class StochasticEnvironment(Environment, ABC):
 
         Not all environments have (easily) enumerable arms: this function is not necessarily implemented by subclasses.
         """
-        raise NotImplemented()
+        raise NotImplementedError
 
 
 class StochasticMultiArmedEnvironment(BanditFeedbackEnvironment, StochasticEnvironment):
