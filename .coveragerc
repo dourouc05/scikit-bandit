@@ -1,9 +1,10 @@
 [run]
 branch = True
-source=skbandit
+source = skbandit
 
 [report]
 exclude_lines =
+    pass
     if self.debug:
     pragma: no cover
     raise NotImplementedError

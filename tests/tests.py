@@ -154,7 +154,7 @@ class TestAdversarialMultiArmedEnvironment(unittest.TestCase):
         self.assertTrue(env.will_accept_input())
         self.assertAlmostEqual(env.reward(1), 1.0)
         self.assertTrue(env.will_accept_input())
-        
+
         self.assertAlmostEqual(env.regret(0.0), 1.0)
         self.assertAlmostEqual(env.regret(1.0), 0.0)
 
