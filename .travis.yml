@@ -6,7 +6,7 @@ python:
   - "3.7"
 install:
   - pip install -r requirements.txt
-  - pip install --user codecov coverage
+  - pip install codecov coverage
 script:
   - coverage run tests/tests.py
 after_success:
