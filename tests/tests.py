@@ -141,6 +141,12 @@ class DeterministicAdversary(Adversary):
         return [0.0, 1.0]
 
 
+class TestAdversary(unittest.TestCase):
+    def test_one(self):
+        a = DeterministicAdversary()
+        self.assertEqual(a.n_arms, 2)
+
+
 class TestAdversarialMultiArmedEnvironment(unittest.TestCase):
     def test_one(self):
         env = AdversarialMultiArmedEnvironment(DeterministicAdversary())
@@ -148,6 +154,8 @@ class TestAdversarialMultiArmedEnvironment(unittest.TestCase):
         self.assertEqual(env.n_arms, 2)
         self.assertFalse(env.may_stop_accepting_inputs)
         self.assertTrue(env.will_accept_input())
+        with self.assertRaises(AssertionError):
+            env.regret(1.0)
 
         # For this specific adversary, the rewards are known in advance.
         self.assertAlmostEqual(env.reward(0), 0.0)
