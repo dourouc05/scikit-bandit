@@ -115,6 +115,9 @@ class TestStochasticMultiArmedEnvironment(unittest.TestCase):
         env = StochasticMultiArmedEnvironment([rv0, rv1])
 
         self.assertEqual(env.n_arms, 2)
+        self.assertFalse(env.may_stop_accepting_inputs)
+        self.assertTrue(env.will_accept_input())
+
         self.assertAlmostEqual(env.true_reward(0), 0.0)
         self.assertAlmostEqual(env.true_reward(1), 1.0)
         self.assertEqual(env.true_rewards[0], env.true_reward(0))
@@ -122,7 +125,9 @@ class TestStochasticMultiArmedEnvironment(unittest.TestCase):
 
         # For these specific distributions, the rewards are known in advance.
         self.assertAlmostEqual(env.reward(0), 0.0)
+        self.assertTrue(env.will_accept_input())
         self.assertAlmostEqual(env.reward(1), 1.0)
+        self.assertTrue(env.will_accept_input())
 
 
 class DeterministicAdversary(Adversary):
@@ -141,10 +146,15 @@ class TestAdversarialMultiArmedEnvironment(unittest.TestCase):
         env = AdversarialMultiArmedEnvironment(DeterministicAdversary())
 
         self.assertEqual(env.n_arms, 2)
+        self.assertFalse(env.may_stop_accepting_inputs)
+        self.assertTrue(env.will_accept_input())
 
         # For this specific adversary, the rewards are known in advance.
         self.assertAlmostEqual(env.reward(0), 0.0)
+        self.assertTrue(env.will_accept_input())
         self.assertAlmostEqual(env.reward(1), 1.0)
+        self.assertTrue(env.will_accept_input())
+        
         self.assertAlmostEqual(env.regret(0.0), 1.0)
         self.assertAlmostEqual(env.regret(1.0), 0.0)
 
