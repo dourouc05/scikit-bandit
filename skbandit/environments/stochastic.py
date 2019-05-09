@@ -19,7 +19,7 @@ class StochasticEnvironment(Environment, ABC):
         being played.
         """
 
-        if isinstance(arm, collections.Sequence):  # Several arms.
+        if isinstance(arm, collections.abc.Sequence):  # Several arms.
             return sum(self.true_rewards[a] for a in arm)
         else:  # Single arm.
             return self.true_rewards[arm]

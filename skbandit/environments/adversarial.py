@@ -55,7 +55,7 @@ class AdversarialMultiArmedEnvironment(BanditFeedbackEnvironment, AdversarialEnv
     def reward(self, arm: int) -> float:
         self._last_rewards = self._adversary.decide_rewards()
 
-        if isinstance(arm, collections.Sequence):  # Several arms.
+        if isinstance(arm, collections.abc.Sequence):  # Several arms.
             reward = sum(self._last_rewards[a] for a in arm)
         else:  # Single arm.
             reward = self._last_rewards[arm]
