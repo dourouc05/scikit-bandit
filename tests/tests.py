@@ -1,11 +1,13 @@
 import unittest
-from typing import List
+from typing import List, Union
 
 from scipy.stats import rv_histogram
 
-from skbandit.bandit import ExploreThenCommitBandit
-from skbandit.environment import StochasticMultiArmedEnvironment, AdversarialMultiArmedEnvironment, Adversary
-from skbandit.experiment import MultiArmedStochasticExperiment, MultiArmedAdversarialExperiment
+from skbandit.bandits.mab import ExploreThenCommitBandit
+from skbandit.environments.stochastic import StochasticMultiArmedEnvironment
+from skbandit.environments.adversarial import AdversarialMultiArmedEnvironment, Adversary
+from skbandit.experiments.stochastic import MultiArmedStochasticExperiment
+from skbandit.experiments.adversarial import MultiArmedAdversarialExperiment
 
 
 class TestExploreThenCommitBandit(unittest.TestCase):
@@ -127,20 +129,16 @@ class DeterministicAdversary(Adversary):
     def __init__(self):
         super().__init__(2)
 
-    def reward(self, arm: int, reward: float) -> None:
+    def register_interaction(self, arm: Union[int, List[int]]) -> None:
         pass
 
-    def pull(self) -> List[float]:
+    def decide_rewards(self) -> List[float]:
         return [0.0, 1.0]
 
 
 class TestAdversarialMultiArmedEnvironment(unittest.TestCase):
-    def test_mismatch_env_bandit(self):
-        with self.assertRaises(AssertionError):
-            AdversarialMultiArmedEnvironment(4, DeterministicAdversary())  # DeterministicAdversary: 2 arms
-
     def test_one(self):
-        env = AdversarialMultiArmedEnvironment(2, DeterministicAdversary())
+        env = AdversarialMultiArmedEnvironment(DeterministicAdversary())
 
         self.assertEqual(env.n_arms, 2)
 
@@ -197,15 +195,8 @@ class TestMultiArmedStochasticExperiment(unittest.TestCase):
 
 
 class TestMultiArmedAdversarialExperiment(unittest.TestCase):
-    def test_mismatch_env_bandit(self):
-        with self.assertRaises(AssertionError):
-            env = AdversarialMultiArmedEnvironment(2, DeterministicAdversary())
-            b = ExploreThenCommitBandit(n_arms=20)
-
-            MultiArmedAdversarialExperiment(env, b)
-
     def test_one(self):
-        env = AdversarialMultiArmedEnvironment(2, DeterministicAdversary())
+        env = AdversarialMultiArmedEnvironment(DeterministicAdversary())
         b = ExploreThenCommitBandit(n_arms=2)
         exp = MultiArmedAdversarialExperiment(env, b)
 
@@ -224,7 +215,7 @@ class TestMultiArmedAdversarialExperiment(unittest.TestCase):
         self.assertAlmostEqual(exp.rounds(10), 0.0)
 
     def test_two(self):
-        env = AdversarialMultiArmedEnvironment(2, DeterministicAdversary())
+        env = AdversarialMultiArmedEnvironment(DeterministicAdversary())
         b = ExploreThenCommitBandit(n_arms=2)
         exp = MultiArmedAdversarialExperiment(env, b)
 

@@ -1,52 +1,8 @@
-from abc import ABC, abstractmethod
 from typing import Union
 
 import math
 
-
-class Bandit(ABC):
-    """A stochastic, multi-armed bandit player.
-
-    A bandit player can be implemented using three methods:
-
-    * a constructor: to create the player (required parameters, number of arms, etc.)
-    * `pull()`: decide the current arm to pull (an integer number, starting at 0)
-    * `reward(arm, reward)`: when pulling the `arm`, the player got a `reward`. This function is supposed to, but does
-      not have to, be called after each call to `pull()`
-    """
-
-    def __init__(self, n_arms: int):
-        self._n_arms = n_arms
-
-    @abstractmethod
-    def pull(self) -> int:
-        pass
-
-    @abstractmethod
-    def reward(self, arm: int, reward: float) -> None:
-        pass
-
-    @property
-    def n_arms(self):
-        return self._n_arms
-
-
-class RewardAccumulatorMixin:
-    def __init__(self, n_arms: int):
-        self._arm_counts = [0] * n_arms
-        self._total_rewards = [0.0] * n_arms
-
-    def reward(self, arm: int, reward: float) -> None:
-        self._arm_counts[arm] += 1
-        self._total_rewards[arm] += reward
-
-    @property
-    def total_rewards(self):
-        return self._total_rewards
-
-    @property
-    def arm_counts(self):
-        return self._arm_counts
+from skbandit.bandits.base import Bandit, RewardAccumulatorMixin
 
 
 class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
@@ -105,11 +61,6 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
         if self._current_round <= self._n_arms * self._n_epochs:
             RewardAccumulatorMixin.reward(self, arm, reward)
 
-
-class ExponentiallyWeightedForecaster(Bandit):
-    pass
-
-
 # TODO: Thompson sampling
 # TODO: epsilon-greedy
 #   Example source: https://towardsdatascience.com/solving-multiarmed-bandits-a-comparison-of-epsilon-greedy-and-thompson-sampling-d97167ca9a50
@@ -119,10 +70,3 @@ class ExponentiallyWeightedForecaster(Bandit):
 #   Example source: https://tor-lattimore.com/downloads/book/book.pdf, chapter 7
 # TODO: MOSS
 #   Example source: https://tor-lattimore.com/downloads/book/book.pdf, chapter 9
-# TODO: EXP3
-#   Example source: https://tor-lattimore.com/downloads/book/book.pdf, chapter 11
-# TODO: Explore what others implement:
-#   https://github.com/jkomiyama/banditlib
-#   https://www.di.ens.fr/~cappe/Code/PymaBandits/
-#   https://github.com/flaviotruzzi/AdBandits
-#   http://banditslilian.gforge.inria.fr/index.html -> https://smpybandits.readthedocs.io/en/latest/docs/Policies.html#submodules
