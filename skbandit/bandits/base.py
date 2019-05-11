@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import Union, List, Dict
+import numpy as np
 
 
 class Bandit(ABC):
@@ -19,13 +20,13 @@ class Bandit(ABC):
         self._n_arms = n_arms
 
     @abstractmethod
-    def pull(self) -> Union[int, List[int]]:
+    def pull(self, context: Union[None, np.ndarray] = None) -> Union[int, List[int]]:
         pass
 
-    def reward(self, arm: int, reward: float) -> None:
+    def reward(self, arm: int, reward: float, context: Union[None, np.ndarray] = None) -> None:
         raise NotImplementedError
 
-    def rewards(self, reward: Union[List[float], Dict[int, float]]) -> None:
+    def rewards(self, reward: Union[List[float], Dict[int, float]], context: Union[None, np.ndarray] = None) -> None:
         raise NotImplementedError
 
     @property
@@ -38,7 +39,7 @@ class RewardAccumulatorMixin:
         self._arm_counts = [0] * n_arms
         self._total_rewards = [0.0] * n_arms
 
-    def reward(self, arm: int, reward: float) -> None:
+    def reward(self, arm: int, reward: float, **kwargs) -> None:
         self._arm_counts[arm] += 1
         self._total_rewards[arm] += reward
 
@@ -49,6 +50,7 @@ class RewardAccumulatorMixin:
     @property
     def arm_counts(self):
         return self._arm_counts
+
 
 # TODO: Explore what others implement:
 #   https://github.com/jkomiyama/banditlib

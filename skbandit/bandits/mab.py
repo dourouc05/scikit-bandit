@@ -42,7 +42,7 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
         if self._current_round % self._n_arms == 0:
             self._n_remaining_epochs -= 1
 
-    def pull(self) -> int:
+    def pull(self, **kwargs) -> int:
         # Exploration phase: explore once each arm.
         if self._current_round < self._n_arms * self._n_epochs:
             arm = self._current_round % self._n_arms
@@ -56,10 +56,11 @@ class ExploreThenCommitBandit(Bandit, RewardAccumulatorMixin):
         self._next_round()
         return arm
 
-    def reward(self, arm: int, reward: float) -> None:
+    def reward(self, arm: int, reward: float, **kwargs) -> None:
         # Stop storing rewards after the exploration phase.
         if self._current_round <= self._n_arms * self._n_epochs:
             RewardAccumulatorMixin.reward(self, arm, reward)
+
 
 # TODO: Thompson sampling
 # TODO: epsilon-greedy

@@ -1,11 +1,8 @@
-import collections
 from abc import ABC, abstractmethod
 
 from skbandit.bandits import Bandit
 from skbandit.environments import Environment, EnvironmentNoMoreAcceptingInputsException, FullInformationEnvironment, \
     SemiBanditFeedbackEnvironment, BanditFeedbackEnvironment
-from skbandit.environments.stochastic import StochasticMultiArmedEnvironment
-from skbandit.environments.adversarial import AdversarialMultiArmedEnvironment
 
 
 class Experiment(ABC):
